@@ -78,7 +78,7 @@ class TournamentController extends Controller
         $tournament->status = TournamentStatus::ACTIVE;
         $tournament->save();
 
-        return redirect()->route('admin.dashboard')->with('success', 'Turnamen dipilih untuk dikelola.');
+        return redirect()->route('admin.manage.dashboard', $tournament)->with('success', 'Turnamen dipilih untuk dikelola.');
     }
 
     protected function generateSlug(string $name, ?int $excludeId = null): string

@@ -29,7 +29,7 @@ class TournamentFactory extends Factory
             'tanggal_mulai' => fake()->dateTimeBetween('now', '+1 month')->format('Y-m-d'),
             'tanggal_selesai' => fake()->dateTimeBetween('+2 weeks', '+2 months')->format('Y-m-d'),
             'lokasi' => fake()->address(),
-            'status' => TournamentStatus::DRAFT->value,
+            'status' => TournamentStatus::ACTIVE->value,
             'pengaturan_format' => ['format' => 'pool', 'jumlah_tim' => 8],
         ];
     }

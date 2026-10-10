@@ -3,84 +3,108 @@
 @section('title', 'Ringkasan - Dashboard Admin')
 
 @section('content')
-<div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
-        <h1 class="text-2xl sm:text-3xl font-semibold">Ringkasan Turnamen</h1>
-        <p class="mt-2 text-sm text-slate-400">Pantau dan kelola semua turnamen dari satu tempat</p>
-    </div>
-    <a href="{{ route('admin.tournaments.create') }}" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-5 py-2.5 text-sm font-medium transition hover:from-blue-500 hover:to-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/40">
-        Tambah Turnamen Baru
-    </a>
-</div>
-
-<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
     @php
-        $total = \App\Models\Tournament::count();
-        $draft = \App\Models\Tournament::where('status', \App\TournamentStatus::DRAFT)->count();
-        $active = \App\Models\Tournament::where('status', \App\TournamentStatus::ACTIVE)->count();
-        $completed = \App\Models\Tournament::where('status', \App\TournamentStatus::COMPLETED)->count();
-    @endphp
-    <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-5">
-        <p class="text-sm text-slate-400">Total Turnamen</p>
-        <p class="mt-2 text-2xl font-semibold">{{ $total }}</p>
-    </div>
-    <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-5">
-        <p class="text-sm text-slate-400">Draft</p>
-        <p class="mt-2 text-2xl font-semibold">{{ $draft }}</p>
-    </div>
-    <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-5">
-        <p class="text-sm text-slate-400">Aktif</p>
-        <p class="mt-2 text-2xl font-semibold">{{ $active }}</p>
-    </div>
-    <div class="rounded-2xl border border-slate-800 bg-slate-900/40 p-5">
-        <p class="text-sm text-slate-400">Selesai</p>
-        <p class="mt-2 text-2xl font-semibold">{{ $completed }}</p>
-    </div>
-</div>
+        $ikon = fn (string $d) => '<svg fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="' . $d . '" /></svg>';
 
-<div class="rounded-2xl border border-slate-800 bg-slate-900/40">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 border-b border-slate-800">
-        <h2 class="text-lg font-semibold">Daftar Turnamen</h2>
-        <a href="{{ route('admin.tournaments.index') }}" class="text-sm text-cyan-300 hover:text-cyan-200 transition">Lihat semua</a>
+        $statistik = [
+            ['label' => 'Total Turnamen', 'nilai' => \App\Models\Tournament::count(), 'icon' => $ikon('M16.5 18.75h-9m9 0a3 3 0 0 1 3 3h-15a3 3 0 0 1 3-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 0 1-.982-3.172M9.497 14.25a7.454 7.454 0 0 0 .981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 0 0 7.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 0 0 2.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 0 1 2.916.52 6.003 6.003 0 0 1-5.395 4.972m0 0a6.726 6.726 0 0 1-2.749 1.35m0 0a6.772 6.772 0 0 1-3.044 0')],
+            ['label' => 'Draft', 'nilai' => \App\Models\Tournament::where('status', 'draft')->count(), 'icon' => $ikon('M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125')],
+            ['label' => 'Aktif', 'nilai' => \App\Models\Tournament::where('status', 'aktif')->count(), 'icon' => $ikon('M5.636 5.636a9 9 0 1 0 12.728 0M12 2.25v9')],
+            ['label' => 'Selesai', 'nilai' => \App\Models\Tournament::where('status', 'selesai')->count(), 'icon' => $ikon('M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z')],
+        ];
+
+        $perluDilengkapi = \App\Models\Tournament::query()
+            ->where(fn ($q) => $q->whereNull('cabang_olahraga')->orWhere('cabang_olahraga', ''))
+            ->get();
+    @endphp
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Ringkasan Turnamen</h1>
+            <p class="page-subtitle">Pantau dan kelola semua turnamen dari satu tempat</p>
+        </div>
+        <a href="{{ route('admin.tournaments.create') }}" class="btn btn-primary">Tambah Turnamen</a>
     </div>
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-slate-800 text-sm">
-            <thead class="bg-slate-900/60">
-                <tr>
-                    <th class="px-5 py-3 text-left text-xs uppercase tracking-wider text-slate-400">Nama</th>
-                    <th class="px-5 py-3 text-left text-xs uppercase tracking-wider text-slate-400">Cabang</th>
-                    <th class="px-5 py-3 text-left text-xs uppercase tracking-wider text-slate-400">Tanggal</th>
-                    <th class="px-5 py-3 text-left text-xs uppercase tracking-wider text-slate-400">Status</th>
-                    <th class="px-5 py-3 text-left text-xs uppercase tracking-wider text-slate-400">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-800">
-                @forelse(\App\Models\Tournament::latest()->take(10)->get() as $tournament)
-                    <tr class="hover:bg-slate-900/50">
-                        <td class="px-5 py-4 whitespace-nowrap">
-                            <div class="font-medium">{{ $tournament->nama }}</div>
-                            <div class="text-xs text-slate-400">{{ $tournament->lokasi ?? '-' }}</div>
-                        </td>
-                        <td class="px-5 py-4 whitespace-nowrap text-slate-300">{{ $tournament->cabang_olahraga ?? '-' }}</td>
-                        <td class="px-5 py-4 whitespace-nowrap text-slate-300">{{ optional($tournament->tanggal_mulai)->format('d M Y') }} - {{ optional($tournament->tanggal_selesai)->format('d M Y') }}</td>
-                        <td class="px-5 py-4 whitespace-nowrap">
-                            <span class="rounded-full border border-cyan-400/40 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-200">{{ $tournament->status?->value ?? $tournament->status }}</span>
-                        </td>
-                        <td class="px-5 py-4 whitespace-nowrap flex flex-wrap gap-2 text-xs">
-                            <a href="{{ route('admin.tournaments.edit', $tournament) }}" class="rounded-lg border border-slate-700 px-2.5 py-1 transition hover:border-cyan-400/60 hover:text-cyan-300">Edit</a>
-                            <form method="POST" action="{{ route('admin.tournaments.activate', $tournament) }}">
-                                @csrf
-                                <button type="submit" class="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 text-emerald-200 transition hover:bg-emerald-500/20">Pilih untuk dikelola</button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
+
+    @if($perluDilengkapi->isNotEmpty())
+        <div class="alert alert-warning mb-6">
+            <div class="flex items-start gap-3">
+                <svg class="mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
+                <div>
+                    <p class="font-semibold">Data turnamen belum lengkap</p>
+                    <p class="mt-1">Turnamen berikut belum memiliki cabang olahraga. Lengkapi agar informasi publik akurat:</p>
+                    <ul class="mt-2 list-inside list-disc space-y-0.5">
+                        @foreach($perluDilengkapi as $turnamen)
+                            <li>
+                                <a href="{{ route('admin.tournaments.edit', $turnamen) }}" class="font-medium underline underline-offset-2">{{ $turnamen->nama }}</a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        @foreach($statistik as $stat)
+            <div class="stat-card">
+                <div class="flex items-start justify-between gap-3">
+                    <span class="stat-icon">{!! $stat['icon'] !!}</span>
+                </div>
+                <p class="stat-value font-display mt-3 text-3xl text-ink">{{ $stat['nilai'] }}</p>
+                <p class="stat-label mt-1">{{ $stat['label'] }}</p>
+            </div>
+        @endforeach
+    </div>
+
+    <div class="card overflow-hidden">
+        <div class="card-header">
+            <h2 class="section-title">Daftar Turnamen</h2>
+            <a href="{{ route('admin.tournaments.index') }}" class="text-sm text-primary transition hover:opacity-80">Lihat semua</a>
+        </div>
+        <div class="table-wrap" style="border:0;border-radius:0;box-shadow:none">
+            <table class="data-table">
+                <thead>
                     <tr>
-                        <td colspan="5" class="px-5 py-8 text-center text-slate-400">Belum ada turnamen. Mulai dengan menambahkan turnamen pertama.</td>
+                        <th class="px-5 py-3 text-left">Nama</th>
+                        <th class="px-5 py-3 text-left">Cabang</th>
+                        <th class="px-5 py-3 text-left">Tanggal</th>
+                        <th class="px-5 py-3 text-left">Status</th>
+                        <th class="px-5 py-3 text-left">Aksi</th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse(\App\Models\Tournament::latest()->take(8)->get() as $tournament)
+                        <tr>
+                            <td class="px-5 py-4">
+                                <div class="font-medium text-ink">{{ $tournament->nama }}</div>
+                                <div class="text-xs text-muted">{{ $tournament->lokasi ?? '-' }}</div>
+                            </td>
+                            <td class="px-5 py-4 text-muted">{{ $tournament->cabang_olahraga ?? '-' }}</td>
+                            <td class="px-5 py-4 whitespace-nowrap text-muted">{{ optional($tournament->tanggal_mulai)->format('d M Y') }} &ndash; {{ optional($tournament->tanggal_selesai)->format('d M Y') }}</td>
+                            <td class="px-5 py-4 whitespace-nowrap">
+                                <span class="badge badge-primary">{{ $tournament->status?->label() ?? $tournament->status?->value ?? $tournament->status }}</span>
+                                @if($tournament->tampil_publik)
+                                    <span class="badge badge-success">Publik</span>
+                                @else
+                                    <span class="badge badge-muted">Draft</span>
+                                @endif
+                            </td>
+                            <td class="px-5 py-4">
+                                <div class="flex flex-wrap gap-2 text-xs">
+                                    <a href="{{ route('admin.manage.dashboard', $tournament) }}" class="btn btn-primary !rounded-lg !px-2.5 !py-1 text-xs">Kelola</a>
+                                    <a href="{{ route('admin.tournaments.edit', $tournament) }}" class="btn btn-outline !rounded-lg !px-2.5 !py-1 text-xs">Edit</a>
+                                    <a href="{{ route('public.tournaments.show', $tournament) }}" class="btn btn-outline !rounded-lg !px-2.5 !py-1 text-xs" target="_blank" rel="noopener">{{ $tournament->tampil_publik ? 'Lihat' : 'Pratinjau' }}</a>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-5 py-10 text-center text-muted">Belum ada turnamen. Mulai dengan menambahkan turnamen pertama.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 @endsection
